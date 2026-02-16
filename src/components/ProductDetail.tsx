@@ -3,19 +3,31 @@
 import { useState } from "react";
 import Image from "next/image";
 import { Product, Category } from "@/lib/types";
+import { Locale, getTranslations } from "@/lib/translations";
 import PriceInquiry from "./PriceDisplay";
 import BackButton from "./BackButton";
 
 interface ProductDetailProps {
   product: Product;
   category?: Category;
+  locale: Locale;
 }
 
 export default function ProductDetail({
   product,
   category,
+  locale,
 }: ProductDetailProps) {
-  const displayName = product.name_lv || product.name_en || product.sku;
+  const t = getTranslations(locale);
+  const displayName = locale === "en"
+    ? (product.name_en || product.name_lv || product.sku)
+    : (product.name_lv || product.name_en || product.sku);
+  const secondaryName = locale === "en"
+    ? (product.name_lv && product.name_en ? product.name_lv : null)
+    : (product.name_en && product.name_lv ? product.name_en : null);
+  const categoryName = category
+    ? (locale === "en" ? category.name_en : category.name_lv)
+    : t.categories;
   const localImages = product.images.filter((img) => img.startsWith("/"));
   const [activeIndex, setActiveIndex] = useState(0);
 
@@ -24,15 +36,15 @@ export default function ProductDetail({
       <BackButton
         href={
           category
-            ? `/lv/categories/${category.slug}`
-            : "/lv/categories"
+            ? `/${locale}/categories/${category.slug}`
+            : `/${locale}/categories`
         }
-        label={category ? category.name_lv : "Kategorijas"}
+        label={categoryName}
       />
 
       <div className="md:flex md:gap-8 md:items-start md:px-4 mt-8 md:mt-12">
         {/* Image area */}
-        <div className="mx-4 mt-3 md:mx-0 md:mt-0 md:w-1/2 md:sticky md:top-4">
+        <div className="animate-fade-in-up mx-4 mt-3 md:mx-0 md:mt-0 md:w-1/2 md:sticky md:top-4">
           <div className={`rounded-2xl h-56 md:h-80 flex items-center justify-center overflow-hidden ${localImages.length > 0 ? "bg-white" : "bg-brand-light-grey"}`}>
             {localImages.length > 0 ? (
               <Image
@@ -86,33 +98,33 @@ export default function ProductDetail({
         </div>
 
         {/* Product info */}
-        <div className="px-4 pt-4 pb-8 md:w-1/2 md:px-0">
+        <div className="animate-fade-in-up px-4 pt-4 pb-8 md:w-1/2 md:px-0" style={{ "--stagger": "100ms" } as React.CSSProperties}>
         <h1 className="text-xl font-bold text-brand-dark">{displayName}</h1>
-        {product.name_en && product.name_lv && (
-          <p className="text-sm text-brand-grey mt-1">{product.name_en}</p>
+        {secondaryName && (
+          <p className="text-sm text-brand-grey mt-1">{secondaryName}</p>
         )}
 
         <div className="mt-3">
-          <PriceInquiry productName={displayName} sku={product.sku} size="lg" />
+          <PriceInquiry productName={displayName} sku={product.sku} size="lg" locale={locale} />
         </div>
 
         {/* Details grid */}
         <div className="mt-4 space-y-2">
           {product.sku && (
             <div className="flex justify-between text-sm">
-              <span className="text-brand-grey">Artikuls</span>
+              <span className="text-brand-grey">{t.sku}</span>
               <span className="text-brand-dark font-medium">{product.sku}</span>
             </div>
           )}
           {product.ean && (
             <div className="flex justify-between text-sm">
-              <span className="text-brand-grey">EAN</span>
+              <span className="text-brand-grey">{t.ean}</span>
               <span className="text-brand-dark font-medium">{product.ean}</span>
             </div>
           )}
           {product.brand && (
             <div className="flex justify-between text-sm">
-              <span className="text-brand-grey">Zīmols</span>
+              <span className="text-brand-grey">{t.brand}</span>
               <span className="text-brand-dark font-medium">
                 {product.brand}
               </span>
@@ -120,22 +132,22 @@ export default function ProductDetail({
           )}
           {category && (
             <div className="flex justify-between text-sm">
-              <span className="text-brand-grey">Kategorija</span>
+              <span className="text-brand-grey">{t.category}</span>
               <span className="text-brand-dark font-medium">
-                {category.name_lv}
+                {categoryName}
               </span>
             </div>
           )}
         </div>
 
         {/* Description */}
-        {product.description_lv && (
+        {(product.description_lv || product.description_en) && (
           <div className="mt-6">
             <h2 className="text-base font-semibold text-brand-dark mb-2">
-              Par produktu
+              {t.aboutProduct}
             </h2>
             <p className="text-sm text-brand-grey leading-relaxed whitespace-pre-line">
-              {product.description_lv}
+              {locale === "en" ? (product.description_en || product.description_lv) : (product.description_lv || product.description_en)}
             </p>
           </div>
         )}

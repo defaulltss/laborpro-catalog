@@ -1,13 +1,15 @@
-import Link from "next/link";
+import { Locale, getTranslations } from "@/lib/translations";
 
 interface PriceInquiryProps {
   productName: string;
   sku: string;
   size?: "sm" | "lg";
+  locale?: Locale;
 }
 
-export default function PriceInquiry({ productName, sku, size = "sm" }: PriceInquiryProps) {
-  const subject = encodeURIComponent(`Cenas pieprasījums: ${sku} – ${productName}`);
+export default function PriceInquiry({ productName, sku, size = "sm", locale = "lv" }: PriceInquiryProps) {
+  const t = getTranslations(locale);
+  const subject = encodeURIComponent(t.emailSubject(sku, productName));
   const mailtoLink = `mailto:info@hairsera.lv?subject=${subject}`;
 
   if (size === "lg") {
@@ -19,14 +21,14 @@ export default function PriceInquiry({ productName, sku, size = "sm" }: PriceInq
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
         </svg>
-        Uzzināt vairāk par produktu
+        {t.inquireLg}
       </a>
     );
   }
 
   return (
     <span className="text-xs font-medium text-brand-pink">
-      Uzzināt vairāk
+      {t.inquireSm}
     </span>
   );
 }
