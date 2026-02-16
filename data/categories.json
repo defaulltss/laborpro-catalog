@@ -1,0 +1,178 @@
+[
+  {
+    "id": 1,
+    "number": "01",
+    "name_en": "Hair Dryers",
+    "name_lv": "Matu žāvētāji",
+    "slug": "hair-dryers",
+    "productCount": 57
+  },
+  {
+    "id": 2,
+    "number": "02",
+    "name_en": "Flat and Curling Irons",
+    "name_lv": "Taisnotāji un lokšķēres",
+    "slug": "flat-and-curling-irons",
+    "productCount": 80
+  },
+  {
+    "id": 3,
+    "number": "03",
+    "name_en": "Hair Clippers",
+    "name_lv": "Matu griešanas mašīnītes",
+    "slug": "hair-clippers",
+    "productCount": 41
+  },
+  {
+    "id": 4,
+    "number": "04",
+    "name_en": "Barber and Accessories",
+    "name_lv": "Bārddzinim un piederumi",
+    "slug": "barber-and-accessories",
+    "productCount": 128
+  },
+  {
+    "id": 5,
+    "number": "05",
+    "name_en": "Brushes",
+    "name_lv": "Sukas",
+    "slug": "brushes",
+    "productCount": 96
+  },
+  {
+    "id": 6,
+    "number": "06",
+    "name_en": "Combs",
+    "name_lv": "Ķemmes",
+    "slug": "combs",
+    "productCount": 83
+  },
+  {
+    "id": 7,
+    "number": "07",
+    "name_en": "Steel Tools",
+    "name_lv": "Tērauda instrumenti",
+    "slug": "steel-tools",
+    "productCount": 127
+  },
+  {
+    "id": 8,
+    "number": "08",
+    "name_en": "Scissors",
+    "name_lv": "Šķēres",
+    "slug": "scissors",
+    "productCount": 80
+  },
+  {
+    "id": 9,
+    "number": "09",
+    "name_en": "Colouring and Styling",
+    "name_lv": "Krāsošana un veidošana",
+    "slug": "colouring-and-styling",
+    "productCount": 407
+  },
+  {
+    "id": 10,
+    "number": "10",
+    "name_en": "Hair Accessories",
+    "name_lv": "Matu piederumi",
+    "slug": "hair-accessories",
+    "productCount": 107
+  },
+  {
+    "id": 11,
+    "number": "11",
+    "name_en": "Disposable Items",
+    "name_lv": "Vienreizlietojamie piederumi",
+    "slug": "disposable-items",
+    "productCount": 23
+  },
+  {
+    "id": 12,
+    "number": "12",
+    "name_en": "Sterilization and Hygiene",
+    "name_lv": "Sterilizācija un higiēna",
+    "slug": "sterilization-and-hygiene",
+    "productCount": 56
+  },
+  {
+    "id": 13,
+    "number": "13",
+    "name_en": "Make-Up and Eyelashes",
+    "name_lv": "Grims un skropstas",
+    "slug": "make-up-and-eyelashes",
+    "productCount": 60
+  },
+  {
+    "id": 14,
+    "number": "14",
+    "name_en": "Manicure and Nails",
+    "name_lv": "Manikīrs un nagi",
+    "slug": "manicure-and-nails",
+    "productCount": 144
+  },
+  {
+    "id": 15,
+    "number": "15",
+    "name_en": "Pedicure",
+    "name_lv": "Pedikīrs",
+    "slug": "pedicure",
+    "productCount": 63
+  },
+  {
+    "id": 16,
+    "number": "16",
+    "name_en": "Hair Removal",
+    "name_lv": "Depilācija",
+    "slug": "hair-removal",
+    "productCount": 49
+  },
+  {
+    "id": 17,
+    "number": "17",
+    "name_en": "Wellness and Treatment Tools",
+    "name_lv": "Labsajūtas un procedūru instrumenti",
+    "slug": "wellness-and-treatment-tools",
+    "productCount": 94
+  },
+  {
+    "id": 18,
+    "number": "18",
+    "name_en": "Hair Extensions and Coiffure",
+    "name_lv": "Matu pieaudzēšana un frizūras",
+    "slug": "hair-extensions-and-coiffure",
+    "productCount": 265
+  },
+  {
+    "id": 19,
+    "number": "19",
+    "name_en": "Training Heads",
+    "name_lv": "Mācību galvas",
+    "slug": "training-heads",
+    "productCount": 28
+  },
+  {
+    "id": 20,
+    "number": "20",
+    "name_en": "Apparel and Clothing",
+    "name_lv": "Apģērbs un tērpi",
+    "slug": "apparel-and-clothing",
+    "productCount": 68
+  },
+  {
+    "id": 21,
+    "number": "21",
+    "name_en": "Cases and Bags",
+    "name_lv": "Somas un čemodāni",
+    "slug": "cases-and-bags",
+    "productCount": 16
+  },
+  {
+    "id": 22,
+    "number": "22",
+    "name_en": "Furnishings",
+    "name_lv": "Iekārtas un mēbeles",
+    "slug": "furnishings",
+    "productCount": 65
+  }
+]

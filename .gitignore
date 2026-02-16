@@ -36,6 +36,12 @@ yarn-error.log*
 # vercel
 .vercel
 
+# product images (too large for git, host separately)
+/public/images/products/
+
+# script cache/progress files
+scripts/*.json
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
