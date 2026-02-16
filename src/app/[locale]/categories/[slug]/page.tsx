@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getCategoryBySlug, getProductsByCategoryPaginated, getCategories } from "@/lib/data";
+import { getCategoryBySlug, getProductsByCategoryPaginated } from "@/lib/data";
 import { getTranslations, Locale } from "@/lib/translations";
 import ProductList from "@/components/ProductList";
 
@@ -9,10 +9,7 @@ interface Props {
   searchParams: Promise<{ page?: string }>;
 }
 
-export async function generateStaticParams() {
-  const categories = getCategories();
-  return categories.map((c) => ({ slug: c.slug }));
-}
+export const dynamicParams = true;
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, slug } = await params;
