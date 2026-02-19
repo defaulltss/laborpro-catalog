@@ -15,7 +15,7 @@ export default function ProductListItem({ product, locale, index = 0 }: ProductL
   const displayName = locale === "en"
     ? (product.name_en || product.name_lv || product.sku)
     : (product.name_lv || product.name_en || product.sku);
-  const hasImage = product.images.length > 0 && product.images[0].startsWith('/');
+  const hasImage = product.images.length > 0 && (product.images[0].startsWith('/') || product.images[0].startsWith('https://'));
 
   return (
     <Link href={`/${locale}/products/${product.id}`} className="md:h-full">

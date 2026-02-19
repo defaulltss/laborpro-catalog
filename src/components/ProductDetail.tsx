@@ -28,7 +28,7 @@ export default function ProductDetail({
   const categoryName = category
     ? (locale === "en" ? category.name_en : category.name_lv)
     : t.categories;
-  const localImages = product.images.filter((img) => img.startsWith("/"));
+  const localImages = product.images.filter((img) => img.startsWith("/") || img.startsWith("https://"));
   const [activeIndex, setActiveIndex] = useState(0);
 
   return (
