@@ -56,4 +56,16 @@ export async function clearSession(): Promise<void> {
   });
 }
 
+/** Check if current request has a valid admin session (for use in server components) */
+export async function isAdminSession(): Promise<boolean> {
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get(SESSION_COOKIE)?.value;
+    if (!token) return false;
+    return verifySession(token);
+  } catch {
+    return false;
+  }
+}
+
 export { SESSION_COOKIE };
