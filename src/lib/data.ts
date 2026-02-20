@@ -1,5 +1,5 @@
 import { Category, Product } from './types';
-import { getHiddenProductIds } from './db';
+import { getHiddenProductIds, getProductOverrides } from './db';
 import fs from 'fs';
 import path from 'path';
 
@@ -26,14 +26,40 @@ function getLoadedProducts(): Product[] {
   return _products;
 }
 
+/** Apply overrides map to a list of products, returning new product objects */
+function applyOverrides(
+  products: Product[],
+  overridesMap: Map<number, Record<string, unknown>>
+): Product[] {
+  if (overridesMap.size === 0) return products;
+  return products.map((p) => {
+    const ov = overridesMap.get(p.id);
+    if (!ov) return p;
+    return { ...p, ...ov } as Product;
+  });
+}
+
+/** Apply overrides to a single product */
+function applyOverrideSingle(
+  product: Product,
+  overridesMap: Map<number, Record<string, unknown>>
+): Product {
+  const ov = overridesMap.get(product.id);
+  if (!ov) return product;
+  return { ...product, ...ov } as Product;
+}
+
 export function getCategories(): Category[] {
   return getLoadedCategories();
 }
 
-/** Categories with product counts adjusted for hidden products */
+/** Categories with product counts adjusted for hidden products and overrides */
 export async function getCategoriesWithCounts(): Promise<Category[]> {
-  const hidden = await getHiddenProductIds();
-  const products = getLoadedProducts();
+  const [hidden, overrides] = await Promise.all([
+    getHiddenProductIds(),
+    getProductOverrides(),
+  ]);
+  const products = applyOverrides(getLoadedProducts(), overrides);
   const categories = getLoadedCategories();
 
   // Count visible products per category slug
@@ -60,14 +86,24 @@ export function getCategoryById(id: number): Category | undefined {
 
 export const PRODUCTS_PER_PAGE = 24;
 
-/** All products unfiltered — used by admin panel */
-export function getAllProducts(): Product[] {
+/** All products with overrides applied — used by admin panel display */
+export async function getAllProducts(): Promise<Product[]> {
+  const overrides = await getProductOverrides();
+  return applyOverrides(getLoadedProducts(), overrides);
+}
+
+/** Raw base products without overrides — used by admin to show original values */
+export function getAllBaseProducts(): Product[] {
   return getLoadedProducts();
 }
 
 export async function getProductsByCategory(categorySlug: string): Promise<Product[]> {
-  const hidden = await getHiddenProductIds();
-  return getLoadedProducts().filter(
+  const [hidden, overrides] = await Promise.all([
+    getHiddenProductIds(),
+    getProductOverrides(),
+  ]);
+  const products = applyOverrides(getLoadedProducts(), overrides);
+  return products.filter(
     (p) => p.categorySlug === categorySlug && !hidden.has(p.id)
   );
 }
@@ -86,10 +122,13 @@ export async function getProductsByCategoryPaginated(
 }
 
 export async function getProductById(id: number): Promise<Product | undefined> {
-  const hidden = await getHiddenProductIds();
+  const [hidden, overrides] = await Promise.all([
+    getHiddenProductIds(),
+    getProductOverrides(),
+  ]);
   const product = getLoadedProducts().find((p) => p.id === id);
-  if (product && hidden.has(product.id)) return undefined;
-  return product;
+  if (!product || hidden.has(product.id)) return undefined;
+  return applyOverrideSingle(product, overrides);
 }
 
 export async function searchProducts(
@@ -97,11 +136,16 @@ export async function searchProducts(
   categorySlug?: string
 ): Promise<Product[]> {
   const q = query.toLowerCase();
-  const hidden = await getHiddenProductIds();
+  const [hidden, overrides] = await Promise.all([
+    getHiddenProductIds(),
+    getProductOverrides(),
+  ]);
+  const base = getLoadedProducts();
   const pool = categorySlug
-    ? getLoadedProducts().filter((p) => p.categorySlug === categorySlug)
-    : getLoadedProducts();
-  return pool.filter(
+    ? base.filter((p) => p.categorySlug === categorySlug)
+    : base;
+  const withOverrides = applyOverrides(pool, overrides);
+  return withOverrides.filter(
     (p) =>
       !hidden.has(p.id) &&
       ((p.name_lv || '').toLowerCase().includes(q) ||

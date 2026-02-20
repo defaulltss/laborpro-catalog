@@ -3,33 +3,48 @@
 import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Product } from '@/lib/types';
+import { Product, Category } from '@/lib/types';
 import AdminToggle from './AdminToggle';
+import AdminEditModal from './AdminEditModal';
 
 const PRODUCTS_PER_PAGE = 50;
 
 type FilterMode = 'all' | 'visible' | 'hidden';
 
 interface AdminDashboardProps {
-  products: Product[];
+  baseProducts: Product[];
   initialVisibility: Record<number, boolean>;
+  initialOverrides: Record<number, Record<string, unknown>>;
+  categories: Category[];
 }
 
 export default function AdminDashboard({
-  products,
+  baseProducts,
   initialVisibility,
+  initialOverrides,
+  categories,
 }: AdminDashboardProps) {
   const router = useRouter();
   const [visibility, setVisibility] = useState(initialVisibility);
+  const [overrides, setOverrides] = useState(initialOverrides);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<FilterMode>('all');
   const [page, setPage] = useState(1);
   const [loadingIds, setLoadingIds] = useState<Set<number>>(new Set());
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
   function isVisible(productId: number): boolean {
-    // Products with no row in visibility table are visible by default
     return visibility[productId] !== false;
   }
+
+  // Merge overrides into base products for display
+  const products = useMemo(() => {
+    return baseProducts.map((p) => {
+      const ov = overrides[p.id];
+      if (!ov) return p;
+      return { ...p, ...ov } as Product;
+    });
+  }, [baseProducts, overrides]);
 
   const filtered = useMemo(() => {
     let list = products;
@@ -63,6 +78,7 @@ export default function AdminDashboard({
 
   const visibleCount = products.filter((p) => isVisible(p.id)).length;
   const hiddenCount = products.length - visibleCount;
+  const editedCount = Object.keys(overrides).length;
 
   async function handleToggle(productId: number) {
     const newVisible = !isVisible(productId);
@@ -89,10 +105,27 @@ export default function AdminDashboard({
     }
   }
 
+  function handleEditSaved(productId: number, newOverrides: Record<string, unknown>) {
+    setOverrides((prev) => {
+      const next = { ...prev };
+      if (Object.keys(newOverrides).length === 0) {
+        delete next[productId];
+      } else {
+        next[productId] = newOverrides;
+      }
+      return next;
+    });
+  }
+
   async function handleLogout() {
     await fetch('/api/admin/logout', { method: 'POST' });
     router.push('/admin/login');
   }
+
+  // Find the base product and current product for the edit modal
+  const editingBase = editingProduct
+    ? baseProducts.find((p) => p.id === editingProduct.id)
+    : null;
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
@@ -125,7 +158,7 @@ export default function AdminDashboard({
       </div>
 
       {/* Stats */}
-      <div className="mb-6 grid grid-cols-3 gap-4">
+      <div className="mb-6 grid grid-cols-4 gap-4">
         <div className="rounded-xl bg-white p-4 text-center shadow-sm">
           <p className="text-2xl font-bold text-brand-dark">{products.length}</p>
           <p className="text-sm text-brand-grey">Total Products</p>
@@ -137,6 +170,10 @@ export default function AdminDashboard({
         <div className="rounded-xl bg-white p-4 text-center shadow-sm">
           <p className="text-2xl font-bold text-red-500">{hiddenCount}</p>
           <p className="text-sm text-brand-grey">Hidden</p>
+        </div>
+        <div className="rounded-xl bg-white p-4 text-center shadow-sm">
+          <p className="text-2xl font-bold text-amber-600">{editedCount}</p>
+          <p className="text-sm text-brand-grey">Edited</p>
         </div>
       </div>
 
@@ -189,12 +226,13 @@ export default function AdminDashboard({
               <th className="hidden px-4 py-3 sm:table-cell">SKU</th>
               <th className="hidden px-4 py-3 md:table-cell">Category</th>
               <th className="px-4 py-3 text-center">Status</th>
-              <th className="px-4 py-3 text-center">Toggle</th>
+              <th className="px-4 py-3 text-center">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
             {pageProducts.map((product) => {
               const visible = isVisible(product.id);
+              const hasOverrides = product.id in overrides;
               const thumb = product.images?.[0];
               return (
                 <tr key={product.id} className="hover:bg-gray-50/50">
@@ -211,9 +249,16 @@ export default function AdminDashboard({
                           N/A
                         </div>
                       )}
-                      <span className="text-sm font-medium text-brand-dark line-clamp-1">
-                        {product.name_lv || product.name_en || product.sku}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-brand-dark line-clamp-1">
+                          {product.name_lv || product.name_en || product.sku}
+                        </span>
+                        {hasOverrides && (
+                          <span className="shrink-0 rounded-full bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-700">
+                            edited
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </td>
                   <td className="hidden px-4 py-3 text-sm text-brand-grey sm:table-cell">
@@ -233,12 +278,21 @@ export default function AdminDashboard({
                       {visible ? 'Visible' : 'Hidden'}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-center">
-                    <AdminToggle
-                      enabled={visible}
-                      loading={loadingIds.has(product.id)}
-                      onToggle={() => handleToggle(product.id)}
-                    />
+                  <td className="px-4 py-3">
+                    <div className="flex items-center justify-center gap-2">
+                      <button
+                        onClick={() => setEditingProduct(product)}
+                        className="rounded-lg border border-gray-300 px-3 py-1 text-xs font-medium
+                                   text-brand-grey transition-colors hover:bg-gray-100 hover:text-brand-dark"
+                      >
+                        Edit
+                      </button>
+                      <AdminToggle
+                        enabled={visible}
+                        loading={loadingIds.has(product.id)}
+                        onToggle={() => handleToggle(product.id)}
+                      />
+                    </div>
                   </td>
                 </tr>
               );
@@ -277,6 +331,18 @@ export default function AdminDashboard({
             Next
           </button>
         </div>
+      )}
+
+      {/* Edit Modal */}
+      {editingProduct && editingBase && (
+        <AdminEditModal
+          product={editingProduct}
+          baseProduct={editingBase}
+          overrides={overrides[editingProduct.id] || {}}
+          categories={categories}
+          onClose={() => setEditingProduct(null)}
+          onSaved={handleEditSaved}
+        />
       )}
     </div>
   );

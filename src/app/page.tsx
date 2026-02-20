@@ -6,8 +6,10 @@ export const dynamic = "force-dynamic";
 
 export default async function Home() {
   const categories = getCategories();
-  const allProducts = getAllProducts();
-  const hidden = await getHiddenProductIds();
+  const [allProducts, hidden] = await Promise.all([
+    getAllProducts(),
+    getHiddenProductIds(),
+  ]);
 
   const visibleCount = allProducts.filter((p) => !hidden.has(p.id)).length;
 

@@ -12,14 +12,21 @@ function getClient(): Client {
   return _client;
 }
 
-// Ensure table exists on first use
+// Ensure tables exist on first use
 let tableInitialized = false;
 async function ensureTable() {
   if (tableInitialized) return;
-  await getClient().execute(`
+  const client = getClient();
+  await client.execute(`
     CREATE TABLE IF NOT EXISTS product_visibility (
       product_id INTEGER PRIMARY KEY,
       visible INTEGER NOT NULL DEFAULT 1
+    )
+  `);
+  await client.execute(`
+    CREATE TABLE IF NOT EXISTS product_overrides (
+      product_id INTEGER PRIMARY KEY,
+      overrides TEXT NOT NULL
     )
   `);
   tableInitialized = true;
@@ -77,4 +84,66 @@ export async function getAllVisibilityStates(): Promise<Map<number, boolean>> {
     map.set(Number(row.product_id), row.visible === 1);
   }
   return map;
+}
+
+// --- Product Overrides ---
+
+let cachedOverrides: Map<number, Record<string, unknown>> | null = null;
+let overridesCacheTimestamp = 0;
+
+export async function getProductOverrides(): Promise<Map<number, Record<string, unknown>>> {
+  const now = Date.now();
+  if (cachedOverrides && now - overridesCacheTimestamp < CACHE_TTL) {
+    return cachedOverrides;
+  }
+
+  try {
+    await ensureTable();
+    const result = await getClient().execute(
+      'SELECT product_id, overrides FROM product_overrides'
+    );
+    const map = new Map<number, Record<string, unknown>>();
+    for (const row of result.rows) {
+      try {
+        map.set(Number(row.product_id), JSON.parse(row.overrides as string));
+      } catch {
+        // skip malformed rows
+      }
+    }
+    cachedOverrides = map;
+    overridesCacheTimestamp = now;
+    return map;
+  } catch (error) {
+    console.error('Failed to fetch product overrides:', error);
+    // Fail-open: return empty map so base JSON data is served
+    return new Map();
+  }
+}
+
+export async function setProductOverrides(
+  productId: number,
+  overrides: Record<string, unknown>
+): Promise<void> {
+  await ensureTable();
+  const json = JSON.stringify(overrides);
+  await getClient().execute({
+    sql: `INSERT INTO product_overrides (product_id, overrides)
+          VALUES (?, ?)
+          ON CONFLICT(product_id) DO UPDATE SET overrides = ?`,
+    args: [productId, json, json],
+  });
+  // Invalidate cache
+  cachedOverrides = null;
+}
+
+export async function deleteProductOverrides(
+  productId: number
+): Promise<void> {
+  await ensureTable();
+  await getClient().execute({
+    sql: 'DELETE FROM product_overrides WHERE product_id = ?',
+    args: [productId],
+  });
+  // Invalidate cache
+  cachedOverrides = null;
 }
