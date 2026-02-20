@@ -1,15 +1,22 @@
-import { createClient } from '@libsql/client';
+import { createClient, type Client } from '@libsql/client';
 
-const client = createClient({
-  url: process.env.TURSO_DATABASE_URL!,
-  authToken: process.env.TURSO_AUTH_TOKEN,
-});
+let _client: Client | null = null;
+
+function getClient(): Client {
+  if (!_client) {
+    _client = createClient({
+      url: process.env.TURSO_DATABASE_URL!,
+      authToken: process.env.TURSO_AUTH_TOKEN,
+    });
+  }
+  return _client;
+}
 
 // Ensure table exists on first use
 let tableInitialized = false;
 async function ensureTable() {
   if (tableInitialized) return;
-  await client.execute(`
+  await getClient().execute(`
     CREATE TABLE IF NOT EXISTS product_visibility (
       product_id INTEGER PRIMARY KEY,
       visible INTEGER NOT NULL DEFAULT 1
@@ -31,7 +38,7 @@ export async function getHiddenProductIds(): Promise<Set<number>> {
 
   try {
     await ensureTable();
-    const result = await client.execute(
+    const result = await getClient().execute(
       'SELECT product_id FROM product_visibility WHERE visible = 0'
     );
     const ids = new Set(result.rows.map((r) => Number(r.product_id)));
@@ -50,7 +57,7 @@ export async function setProductVisibility(
   visible: boolean
 ): Promise<void> {
   await ensureTable();
-  await client.execute({
+  await getClient().execute({
     sql: `INSERT INTO product_visibility (product_id, visible)
           VALUES (?, ?)
           ON CONFLICT(product_id) DO UPDATE SET visible = ?`,
@@ -62,7 +69,7 @@ export async function setProductVisibility(
 
 export async function getAllVisibilityStates(): Promise<Map<number, boolean>> {
   await ensureTable();
-  const result = await client.execute(
+  const result = await getClient().execute(
     'SELECT product_id, visible FROM product_visibility'
   );
   const map = new Map<number, boolean>();
