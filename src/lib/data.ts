@@ -1,4 +1,5 @@
 import { Category, Product } from './types';
+import { getHiddenProductIds } from './db';
 import fs from 'fs';
 import path from 'path';
 
@@ -29,6 +30,26 @@ export function getCategories(): Category[] {
   return getLoadedCategories();
 }
 
+/** Categories with product counts adjusted for hidden products */
+export async function getCategoriesWithCounts(): Promise<Category[]> {
+  const hidden = await getHiddenProductIds();
+  const products = getLoadedProducts();
+  const categories = getLoadedCategories();
+
+  // Count visible products per category slug
+  const counts = new Map<string, number>();
+  for (const p of products) {
+    if (!hidden.has(p.id)) {
+      counts.set(p.categorySlug, (counts.get(p.categorySlug) || 0) + 1);
+    }
+  }
+
+  return categories.map((c) => ({
+    ...c,
+    productCount: counts.get(c.slug) || 0,
+  }));
+}
+
 export function getCategoryBySlug(slug: string): Category | undefined {
   return getLoadedCategories().find((c) => c.slug === slug);
 }
@@ -39,15 +60,23 @@ export function getCategoryById(id: number): Category | undefined {
 
 export const PRODUCTS_PER_PAGE = 24;
 
-export function getProductsByCategory(categorySlug: string): Product[] {
-  return getLoadedProducts().filter((p) => p.categorySlug === categorySlug);
+/** All products unfiltered — used by admin panel */
+export function getAllProducts(): Product[] {
+  return getLoadedProducts();
 }
 
-export function getProductsByCategoryPaginated(
+export async function getProductsByCategory(categorySlug: string): Promise<Product[]> {
+  const hidden = await getHiddenProductIds();
+  return getLoadedProducts().filter(
+    (p) => p.categorySlug === categorySlug && !hidden.has(p.id)
+  );
+}
+
+export async function getProductsByCategoryPaginated(
   categorySlug: string,
   page: number
-): { products: Product[]; totalPages: number; totalProducts: number } {
-  const all = getProductsByCategory(categorySlug);
+): Promise<{ products: Product[]; totalPages: number; totalProducts: number }> {
+  const all = await getProductsByCategory(categorySlug);
   const totalProducts = all.length;
   const totalPages = Math.max(1, Math.ceil(totalProducts / PRODUCTS_PER_PAGE));
   const safePage = Math.max(1, Math.min(page, totalPages));
@@ -56,22 +85,27 @@ export function getProductsByCategoryPaginated(
   return { products, totalPages, totalProducts };
 }
 
-export function getProductById(id: number): Product | undefined {
-  return getLoadedProducts().find((p) => p.id === id);
+export async function getProductById(id: number): Promise<Product | undefined> {
+  const hidden = await getHiddenProductIds();
+  const product = getLoadedProducts().find((p) => p.id === id);
+  if (product && hidden.has(product.id)) return undefined;
+  return product;
 }
 
-export function searchProducts(
+export async function searchProducts(
   query: string,
   categorySlug?: string
-): Product[] {
+): Promise<Product[]> {
   const q = query.toLowerCase();
+  const hidden = await getHiddenProductIds();
   const pool = categorySlug
     ? getLoadedProducts().filter((p) => p.categorySlug === categorySlug)
     : getLoadedProducts();
   return pool.filter(
     (p) =>
-      (p.name_lv || '').toLowerCase().includes(q) ||
-      (p.name_en || '').toLowerCase().includes(q) ||
-      (p.sku || '').toLowerCase().includes(q)
+      !hidden.has(p.id) &&
+      ((p.name_lv || '').toLowerCase().includes(q) ||
+        (p.name_en || '').toLowerCase().includes(q) ||
+        (p.sku || '').toLowerCase().includes(q))
   );
 }

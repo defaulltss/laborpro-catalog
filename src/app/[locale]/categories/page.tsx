@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { getCategories } from "@/lib/data";
+import { getCategoriesWithCounts } from "@/lib/data";
 import { getTranslations, Locale } from "@/lib/translations";
 import CategoryGrid from "@/components/CategoryGrid";
 
@@ -18,6 +18,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function CategoriesPage({ params }: Props) {
   const { locale } = await params;
-  const categories = getCategories();
+  const categories = await getCategoriesWithCounts();
   return <CategoryGrid categories={categories} locale={locale as Locale} />;
 }

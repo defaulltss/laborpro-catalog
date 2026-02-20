@@ -11,7 +11,7 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, id } = await params;
   const t = getTranslations(locale as Locale);
-  const product = getProductById(Number(id));
+  const product = await getProductById(Number(id));
   if (!product) return { title: t.notFound };
   const name = locale === "en"
     ? (product.name_en || product.name_lv || product.sku)
@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ProductPage({ params }: Props) {
   const { locale, id } = await params;
-  const product = getProductById(Number(id));
+  const product = await getProductById(Number(id));
   if (!product) notFound();
 
   const category = getCategoryById(product.categoryId);

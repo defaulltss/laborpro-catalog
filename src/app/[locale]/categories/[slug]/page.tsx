@@ -30,7 +30,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
   if (!category) notFound();
 
   const currentPage = Math.max(1, parseInt(page || "1", 10) || 1);
-  const { products, totalPages, totalProducts } = getProductsByCategoryPaginated(slug, currentPage);
+  const { products, totalPages, totalProducts } = await getProductsByCategoryPaginated(slug, currentPage);
 
   return (
     <ProductList
