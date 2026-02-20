@@ -9,7 +9,7 @@ import AdminEditModal from './AdminEditModal';
 
 const PRODUCTS_PER_PAGE = 50;
 
-type FilterMode = 'all' | 'visible' | 'hidden';
+type FilterMode = 'all' | 'visible' | 'hidden' | 'edited';
 
 interface AdminDashboardProps {
   baseProducts: Product[];
@@ -63,6 +63,8 @@ export default function AdminDashboard({
       list = list.filter((p) => isVisible(p.id));
     } else if (filter === 'hidden') {
       list = list.filter((p) => !isVisible(p.id));
+    } else if (filter === 'edited') {
+      list = list.filter((p) => p.id in overrides);
     }
 
     return list;
@@ -191,7 +193,7 @@ export default function AdminDashboard({
                      focus:border-brand-pink focus:outline-none focus:ring-2 focus:ring-brand-pink/30"
         />
         <div className="flex gap-1 rounded-lg bg-white p-1 shadow-sm">
-          {(['all', 'visible', 'hidden'] as FilterMode[]).map((mode) => (
+          {(['all', 'visible', 'hidden', 'edited'] as FilterMode[]).map((mode) => (
             <button
               key={mode}
               onClick={() => {
