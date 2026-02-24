@@ -21,7 +21,7 @@
     "name_en": "Hair Clippers",
     "name_lv": "Matu griešanas mašīnītes",
     "slug": "hair-clippers",
-    "productCount": 41
+    "productCount": 42
   },
   {
     "id": 4,
@@ -29,7 +29,7 @@
     "name_en": "Barber and Accessories",
     "name_lv": "Bārddzinim un piederumi",
     "slug": "barber-and-accessories",
-    "productCount": 128
+    "productCount": 127
   },
   {
     "id": 5,
@@ -45,7 +45,7 @@
     "name_en": "Combs",
     "name_lv": "Ķemmes",
     "slug": "combs",
-    "productCount": 83
+    "productCount": 86
   },
   {
     "id": 7,
@@ -69,7 +69,7 @@
     "name_en": "Colouring and Styling",
     "name_lv": "Krāsošana un veidošana",
     "slug": "colouring-and-styling",
-    "productCount": 407
+    "productCount": 404
   },
   {
     "id": 10,
@@ -85,7 +85,7 @@
     "name_en": "Disposable Items",
     "name_lv": "Vienreizlietojamie piederumi",
     "slug": "disposable-items",
-    "productCount": 23
+    "productCount": 34
   },
   {
     "id": 12,
@@ -93,7 +93,7 @@
     "name_en": "Sterilization and Hygiene",
     "name_lv": "Sterilizācija un higiēna",
     "slug": "sterilization-and-hygiene",
-    "productCount": 56
+    "productCount": 50
   },
   {
     "id": 13,
@@ -109,7 +109,7 @@
     "name_en": "Manicure and Nails",
     "name_lv": "Manikīrs un nagi",
     "slug": "manicure-and-nails",
-    "productCount": 144
+    "productCount": 145
   },
   {
     "id": 15,
@@ -133,7 +133,7 @@
     "name_en": "Wellness and Treatment Tools",
     "name_lv": "Labsajūtas un procedūru instrumenti",
     "slug": "wellness-and-treatment-tools",
-    "productCount": 94
+    "productCount": 92
   },
   {
     "id": 18,
@@ -141,7 +141,7 @@
     "name_en": "Hair Extensions and Coiffure",
     "name_lv": "Matu pieaudzēšana un frizūras",
     "slug": "hair-extensions-and-coiffure",
-    "productCount": 265
+    "productCount": 263
   },
   {
     "id": 19,
@@ -157,7 +157,7 @@
     "name_en": "Apparel and Clothing",
     "name_lv": "Apģērbs un tērpi",
     "slug": "apparel-and-clothing",
-    "productCount": 68
+    "productCount": 67
   },
   {
     "id": 21,
@@ -173,6 +173,6 @@
     "name_en": "Furnishings",
     "name_lv": "Iekārtas un mēbeles",
     "slug": "furnishings",
-    "productCount": 65
+    "productCount": 64
   }
 ]
